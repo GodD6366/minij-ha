@@ -1,0 +1,11 @@
+{
+  "domain": "minij",
+  "name": "MINIJ 小吉洗衣机",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/godd/minij-ha",
+  "iot_class": "cloud_polling",
+  "loggers": ["custom_components.minij"],
+  "requirements": [],
+  "version": "0.1.0"
+}

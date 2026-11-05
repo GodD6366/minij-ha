@@ -1,0 +1,47 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "登录小吉账号",
+        "description": "输入手机号，会发送短信验证码。",
+        "data": { "phone": "手机号" }
+      },
+      "code": {
+        "title": "输入验证码",
+        "description": "验证码已发送到 {phone}。",
+        "data": { "code": "短信验证码" }
+      },
+      "device": {
+        "title": "选择洗衣机",
+        "description": "账号下有多台设备，选择要接入的一台。",
+        "data": { "device_id": "设备" }
+      },
+      "reauth_confirm": {
+        "title": "重新登录",
+        "description": "token 已失效，重新用手机号登录。",
+        "data": { "phone": "手机号" }
+      },
+      "reauth_code": {
+        "title": "输入验证码",
+        "data": { "code": "短信验证码" }
+      }
+    },
+    "error": {
+      "invalid_auth": "验证码错误或已过期",
+      "cannot_connect": "无法连接小吉云，稍后再试",
+      "no_device": "该账号下没有洗衣机设备"
+    },
+    "abort": { "already_configured": "该设备已添加" }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "运行参数",
+        "data": {
+          "scan_interval": "轮询间隔（秒）",
+          "stop_operate_type": "停止指令 operateType"
+        }
+      }
+    }
+  }
+}
