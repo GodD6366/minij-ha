@@ -24,29 +24,34 @@ from .entity import MinijEntity
 @dataclass(frozen=True, kw_only=True)
 class MinijSensorDescription(SensorEntityDescription):
     value_fn: Callable[[dict[str, Any]], Any] = lambda data: None
+    slug: str = ""
 
 
 SENSORS: tuple[MinijSensorDescription, ...] = (
     MinijSensorDescription(
         key="program",
+        slug="cheng_xu",
         name="程序",
         icon="mdi:washing-machine",
         value_fn=lambda s: s.get("current_mode"),
     ),
     MinijSensorDescription(
         key="status",
+        slug="zhuang_tai",
         name="状态",
         icon="mdi:state-machine",
         value_fn=lambda s: s.get("current_status"),
     ),
     MinijSensorDescription(
         key="stage",
+        slug="jie_duan",
         name="阶段",
         icon="mdi:water",
         value_fn=lambda s: s.get("current_process"),
     ),
     MinijSensorDescription(
         key="remaining",
+        slug="sheng_yu_shi_jian",
         name="剩余时间",
         icon="mdi:timer-outline",
         device_class=SensorDeviceClass.DURATION,
@@ -56,6 +61,7 @@ SENSORS: tuple[MinijSensorDescription, ...] = (
     ),
     MinijSensorDescription(
         key="total",
+        slug="zong_shi_chang",
         name="总时长",
         icon="mdi:timer-sand",
         device_class=SensorDeviceClass.DURATION,
@@ -88,6 +94,8 @@ class MinijSensor(MinijEntity, SensorEntity):
         super().__init__(coordinator, entry)
         self.entity_description = description
         self._attr_unique_id = f"{entry.data['device_id']}_{description.key}"
+        if description.slug:
+            self.entity_id = f"sensor.bi_gua_xi_hong_yi_ti_ji_{description.slug}"
 
     @property
     def native_value(self) -> Any:
