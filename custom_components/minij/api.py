@@ -28,6 +28,14 @@ class MinijClient:
         self._token = token.strip()
         self.device_id = device_id.strip()
 
+    @property
+    def token(self) -> str:
+        return self._token
+
+    @token.setter
+    def token(self, val: str) -> None:
+        self._token = val.strip()
+
     def _headers(self) -> dict[str, str]:
         return {
             "token": self._token,

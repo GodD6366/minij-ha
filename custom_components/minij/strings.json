@@ -29,9 +29,12 @@
     "error": {
       "invalid_auth": "验证码错误或已过期",
       "cannot_connect": "无法连接小吉云，稍后再试",
-      "no_device": "该账号下没有洗衣机设备"
+      "no_device": "该账号下没有洗衣机设备",
+      "unknown": "发生未知错误，请查看日志"
     },
-    "abort": { "already_configured": "该设备已添加" }
+    "abort": {
+      "already_configured": "该设备已添加，已更新登录信息"
+    }
   },
   "options": {
     "step": {

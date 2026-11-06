@@ -63,15 +63,26 @@ class MinijConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 devices = await client.get_devices()
             except MinijAuthError:
                 errors["base"] = "invalid_auth"
-            except MinijError:
-                errors["base"] = "cannot_connect"
+            except MinijError as err:
+                _LOGGER.warning("小吉接口错误: %s", err)
+                msg = str(err).lower()
+                if any(k in msg for k in ("captcha", "验证码", "auth", "token", "code")):
+                    errors["base"] = "invalid_auth"
+                else:
+                    errors["base"] = "cannot_connect"
+            except Exception:
+                _LOGGER.exception("登录小吉账号时发生未知异常")
+                errors["base"] = "unknown"
             else:
                 self._token = client.token
-                self._devices = [d for d in devices if d.get("deviceType") == "washer"] or devices
+                if isinstance(devices, list):
+                    self._devices = [d for d in devices if isinstance(d, dict) and d.get("deviceType") == "washer"] or [d for d in devices if isinstance(d, dict)]
+                else:
+                    self._devices = []
                 if not self._devices:
                     errors["base"] = "no_device"
                 elif len(self._devices) == 1:
-                    return self._create(self._devices[0])
+                    return await self._create(self._devices[0])
                 else:
                     return await self.async_step_device()
 
@@ -86,7 +97,7 @@ class MinijConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_device(self, user_input=None):
         if user_input is not None:
             device = next(d for d in self._devices if d["deviceId"] == user_input[CONF_DEVICE_ID])
-            return self._create(device)
+            return await self._create(device)
 
         options = {
             d["deviceId"]: f"{d.get('deviceNickName') or d.get('deviceName')}（{d['deviceId']}）"
@@ -97,9 +108,15 @@ class MinijConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({vol.Required(CONF_DEVICE_ID): vol.In(options)}),
         )
 
-    def _create(self, device: dict):
-        device_id = device["deviceId"]
-        self.unique_id = device_id
+    async def _create(self, device: dict):
+        device_id = str(device.get("deviceId") or "")
+        await self.async_set_unique_id(device_id)
+        self._abort_if_unique_id_configured(
+            updates={
+                CONF_TOKEN: self._token,
+                CONF_PHONE: self._phone,
+            }
+        )
         return self.async_create_entry(
             title=device.get("deviceNickName") or device.get("deviceName") or "小吉洗衣机",
             data={
@@ -142,8 +159,12 @@ class MinijConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             client = MinijClient(async_get_clientsession(self.hass), "", entry.data[CONF_DEVICE_ID])
             try:
                 await client.login_by_phone(self._phone, user_input["code"].strip())
-            except MinijError:
+            except MinijError as err:
+                _LOGGER.warning("重新认证失败: %s", err)
                 errors["base"] = "invalid_auth"
+            except Exception:
+                _LOGGER.exception("重新认证未知异常")
+                errors["base"] = "unknown"
             else:
                 return self.async_update_reload_and_abort(
                     entry,
